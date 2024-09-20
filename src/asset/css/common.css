@@ -117,3 +117,29 @@ nav li {
     list-style: none;
     margin: 0 0.5rem;
 }
+
+.loading {
+    margin: 25px;
+    /* Center vertically and horizontally */
+    display: flex;
+    justify-content: center;
+    align-items: center
+}
+
+.cardDashboard {
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+    border-radius: 4px;
+    padding: 1rem;
+}
+
+.dashboard {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    height: 600px;
+}
+
+.onlineUsers, .cardDashboard {
+    margin: 25px;
+}

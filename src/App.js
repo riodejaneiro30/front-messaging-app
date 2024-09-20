@@ -46,7 +46,7 @@ function App() {
         <Route path="dashboard" element={<DashboardPage socket={socket} setupSocket={setupSocket} />} exact/>
         <Route path="/login" element={<LoginPage setupSocket={setupSocket} exact />} />
         <Route path="register" element={<RegisterPage />} exact />
-        <Route path="chatroom/:chatroomId" element={<ChatroomPage socket={socket}/>} exact />
+        <Route path="chatroom/:chatroomId" element={<ChatroomPage socket={socket} setupSocket={setupSocket} />} exact />
       </Routes>
     </BrowserRouter>
   );
