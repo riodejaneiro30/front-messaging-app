@@ -4,6 +4,8 @@
     font-family: Montserrat;
     box-sizing: border-box;
     color: #333;
+    margin: 0;
+    padding: 0;
 }
 
 body {
@@ -94,4 +96,24 @@ button {
 a {
     text-decoration: none;
     color: #333;
+}
+
+nav {
+    height: 50px;
+    background: #7C93C3;
+    padding: 0 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+}
+
+.nav-items {
+    display: flex;
+}
+
+nav li {
+    list-style: none;
+    margin: 0 0.5rem;
 }

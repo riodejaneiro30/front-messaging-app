@@ -2,9 +2,13 @@ import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import makeToast from "../Toaster";
+import NavbarComponent from "../component/NavbarComponent";
+import {Row, Col} from "react-bootstrap"
 
-const DashboardPage = ({socket}) => {
+const DashboardPage = ({socket, setupSocket}) => {
     const [chatrooms, setChatroom] = useState([]);
+    const [userOnline, setUserOnline] = useState([]);
+    const [isSocketConnected, setIsSocketConnected] = useState(false);
     const chatroomNameRef = useRef();
 
     const getChatrooms = () => {
@@ -39,15 +43,25 @@ const DashboardPage = ({socket}) => {
                 chatroomNameRef.current.value = "";
             })
             .catch((err) => {
-                console.log(err);
+                if (
+                    err &&
+                    err.response &&
+                    err.response.data &&
+                    err.response.data.message
+                  )
+                    makeToast("error", err.response.data.message);
             })
     }
 
     useEffect(() => {
+        console.log(socket);
+
         getChatrooms();
     }, [])
 
     return (
+        <>
+        <NavbarComponent socket={socket}/>
         <div className="card">
             <p style={{ fontSize: "1.5rem", fontWeight: "bold", textAlign: "center" }}>Chatroom</p>
             <div className="cardBody">
@@ -68,6 +82,7 @@ const DashboardPage = ({socket}) => {
                 </div>
             </div>
         </div>
+        </>
     )
 };
 

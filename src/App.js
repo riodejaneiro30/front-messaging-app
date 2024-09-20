@@ -13,7 +13,7 @@ import makeToast from "./Toaster";
 function App() {
   const [socket, setSocket] = useState(null);
   
-  const setupSocket = () => {
+  const setupSocket = (callback) => {
     const token = localStorage.getItem("token");
 
     if (token && !socket) {
@@ -26,27 +26,24 @@ function App() {
       newSocket.on("disconnect", () => {
         setSocket(null);
         setTimeout(() => {
-          setupSocket();
+          setupSocket(callback);
         }, 3000);
-        makeToast("error", "Connection lost. Reconnecting...");
+        console.log("error : Connection lost. Reconnecting...");
       });
 
       newSocket.on("connect", () => {
         setSocket(newSocket);
-        makeToast("success", "Connection established");
+        console.log("sucesss : Connection established");
+        if (callback) callback();
       });
     }
   };
-
-  useEffect(() => {
-    setupSocket();
-  }, []);
 
   return (
     <BrowserRouter>
       <Routes>
         <Route path="" element={<IndexPage />} exact/>
-        <Route path="dashboard" element={<DashboardPage socket={socket} />} exact/>
+        <Route path="dashboard" element={<DashboardPage socket={socket} setupSocket={setupSocket} />} exact/>
         <Route path="/login" element={<LoginPage setupSocket={setupSocket} exact />} />
         <Route path="register" element={<RegisterPage />} exact />
         <Route path="chatroom/:chatroomId" element={<ChatroomPage socket={socket}/>} exact />

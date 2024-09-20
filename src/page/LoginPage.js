@@ -1,4 +1,4 @@
-import { createRef } from "react";
+import { createRef, useState, useEffect } from "react";
 import axios from "axios";
 import makeToast from "../Toaster";
 import { useNavigate } from "react-router-dom";
@@ -8,6 +8,8 @@ const LoginPage = ({ setupSocket }) => {
 
     const emailRef = createRef();
     const passwordRef = createRef();
+
+    const [isSocketConnected, setIsSocketConnected] = useState(false);
 
     const loginUser = () => {
         const email = emailRef.current.value;
@@ -21,8 +23,9 @@ const LoginPage = ({ setupSocket }) => {
             localStorage.setItem("token", response.data.token);
 
             makeToast("success", response.data.message);
-            navigate("/dashboard");
-            setupSocket();
+            setupSocket(() => {
+                setIsSocketConnected(true);
+            });
         }).catch((err) => {
             if (
                 err &&
@@ -33,6 +36,12 @@ const LoginPage = ({ setupSocket }) => {
                 makeToast("error", err.response.data.message);
         })
     }
+
+    useEffect(() => {
+        if (isSocketConnected) {
+            navigate("/dashboard");
+        }
+    }, [isSocketConnected, navigate]);
 
     return (
         <div className="card">

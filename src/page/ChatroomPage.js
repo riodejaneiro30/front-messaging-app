@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams } from 'react-router-dom';
 import axios from "axios";
+import NavbarComponent from "../component/NavbarComponent";
 
 const ChatroomPage = ({socket}) => {
     const { chatroomId } = useParams();
@@ -53,6 +54,8 @@ const ChatroomPage = ({socket}) => {
     }, [messages]);
 
     useEffect(() => {
+        console.log(socket);
+
         if (socket) {
             socket.emit("joinChatroom", {
                 chatroomId,
@@ -70,6 +73,8 @@ const ChatroomPage = ({socket}) => {
     }, []);
 
     return (
+        <>
+        <NavbarComponent />
         <div className="chatroomPage">
             <div className="chatroomSection">
                 <p style={{ fontSize: "1.5rem", fontWeight: "bold", textAlign: "center" }}>Chatroom {chatroomDetail?.name}</p>
@@ -90,6 +95,7 @@ const ChatroomPage = ({socket}) => {
             </div>
 
         </div>
+        </>
     );
 };
 
