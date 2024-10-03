@@ -2,6 +2,7 @@ import { createRef, useState, useEffect } from "react";
 import axios from "axios";
 import makeToast from "../Toaster";
 import { useNavigate } from "react-router-dom";
+import Cookies from 'js-cookie';
 
 const LoginPage = ({ setupSocket }) => {
     const navigate = useNavigate();
@@ -20,7 +21,7 @@ const LoginPage = ({ setupSocket }) => {
             password
         })
         .then((response) => {
-            localStorage.setItem("token", response.data.token);
+            sessionStorage.setItem("token", response.data.token);
 
             makeToast("success", response.data.message);
             setupSocket(() => {

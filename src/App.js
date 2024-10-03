@@ -9,17 +9,18 @@ import "./asset/css/common.css";
 import "./asset/css/chatroom.css";
 import io from "socket.io-client";
 import makeToast from "./Toaster";
+import Cookies from 'js-cookie';
 
 function App() {
   const [socket, setSocket] = useState(null);
   
   const setupSocket = (callback) => {
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
 
     if (token && !socket) {
       const newSocket = io("http://localhost:8000", {
         query: {
-            token: localStorage.getItem("token"),
+            token: sessionStorage.getItem("token"),
         },
       });
 

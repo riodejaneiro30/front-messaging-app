@@ -3,6 +3,8 @@ import { useParams } from 'react-router-dom';
 import axios from "axios";
 import NavbarComponent from "../component/NavbarComponent";
 import LoadingComponent from "../component/LoadingComponent";
+import Cookies from 'js-cookie';
+import makeToast from "../Toaster";
 
 const ChatroomPage = ({socket, setupSocket}) => {
     const { chatroomId } = useParams();
@@ -10,20 +12,23 @@ const ChatroomPage = ({socket, setupSocket}) => {
     const messageRef = useRef();
     const [chatroomDetail, setChatroomDetail] = useState(null);
     const [dateTime, setDateTime] = useState(new Date());
-
-    const formattedTime = dateTime.toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false, // Use 'true' for 12-hour format with AM/PM
-    });
+    const [joinUsers, setJoinUsers] = useState([]);
 
     const sendMessage = () => {
         if (socket) {
             const message = messageRef.current.value;
-            socket.emit("chatroomMessage", {
+            const formattedTime = dateTime.toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false, // Use 'true' for 12-hour format with AM/PM
+            });
+
+            const data = {
                 chatroomId,
                 message,
-            });
+                formattedTime
+            }
+            socket.emit("chatroomMessage", data);
 
             messageRef.current.value = "";
         }
@@ -32,7 +37,7 @@ const ChatroomPage = ({socket, setupSocket}) => {
     useEffect(() => {
         axios.get(`http://localhost:8000/chatroom/${chatroomId}`, {
             headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`
+                Authorization: `Bearer ${sessionStorage.getItem("token")}`
             }
         })
         .then(res => {
@@ -77,6 +82,22 @@ const ChatroomPage = ({socket, setupSocket}) => {
         }
     }, []);
 
+    useEffect(() => {
+        if (socket) {
+            // Listen for the broadcast message from the server
+            socket.on("receiveImportantMessage", (data) => {
+                makeToast("info", `Announcement: ${data.message}`);
+            });
+        }
+    
+        // Clean up the listener when the component unmounts
+        return () => {
+            if (socket) {
+                socket.off("receiveImportantMessage");
+            }
+        };
+    }, [socket]);
+
     if (!socket) {
         return (
             <LoadingComponent />
@@ -92,7 +113,7 @@ const ChatroomPage = ({socket, setupSocket}) => {
                     <div className="chatroomContent">
                         {messages.map((message, index) => (
                             <div className="message" key={index}>
-                                <span className="otherMessage">{formattedTime} {message.name} : </span> {message.message}
+                                <span className="otherMessage">{message.formattedTime} {message.name} : </span> {message.message}
                             </div>
                         ))}
                     </div>
@@ -100,7 +121,7 @@ const ChatroomPage = ({socket, setupSocket}) => {
                         <div>
                             <input type="text" name="message" placeholder="Type message..." ref={messageRef}/>
                         </div>
-                        <button className="join" onClick={sendMessage}>Join</button>
+                        <button className="join" onClick={sendMessage}>Send</button>
                     </div>
                     
                 </div>

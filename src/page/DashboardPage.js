@@ -4,17 +4,19 @@ import { Link } from "react-router-dom";
 import makeToast from "../Toaster";
 import NavbarComponent from "../component/NavbarComponent";
 import LoadingComponent from "../component/LoadingComponent";
-import {Row, Col} from "react-bootstrap"
+import {Row, Col} from "react-bootstrap";
+import Cookies from 'js-cookie';
 
 const DashboardPage = ({socket, setupSocket}) => {
     const [chatrooms, setChatroom] = useState([]);
     const [userOnline, setUserOnline] = useState([]);
     const chatroomNameRef = useRef();
+    const importantMessageNameRef = useRef();
 
     const getChatrooms = () => {
         axios.get("http://localhost:8000/chatroom", {
             headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`
+                Authorization: `Bearer ${sessionStorage.getItem("token")}`
             }
         })
             .then((response) => {
@@ -34,7 +36,7 @@ const DashboardPage = ({socket, setupSocket}) => {
             name: chatroomName
         }, {
             headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`
+                Authorization: `Bearer ${sessionStorage.getItem("token")}`
             }
         })
             .then((response) => {
@@ -54,8 +56,6 @@ const DashboardPage = ({socket, setupSocket}) => {
     }
 
     useEffect(() => {
-        console.log(socket);
-
         if (!socket) {
             setupSocket();
         }
@@ -63,15 +63,45 @@ const DashboardPage = ({socket, setupSocket}) => {
         getChatrooms();
     }, [])
 
+    const fetchOnlineUsers = () => {
+        if (socket) {
+            socket.emit("getOnlineUsers"); // Request online users from the server
+        }
+    };
+
     useEffect(() => {
+        //console.log(socket);
+
         if (socket) {
             socket.on("updateOnlineUsers", (users) => {
                 setUserOnline(users);
 
-                console.log("Online user", users);
+                //console.log("Online user", users);
             });
+
+            fetchOnlineUsers();
         }
+
+        return () => {
+            if (socket) {
+                socket.off("updateOnlineUsers");
+            }
+        };
     }, [socket, userOnline]);
+
+    const broadcastMessage = () => {
+        const message = importantMessageNameRef.current.value;
+
+        if (socket) {
+            socket.emit("importantMessage", {
+                message
+            });
+
+            importantMessageNameRef.current.value = "";
+
+            makeToast("success", "Important message sent");
+        }
+    };
 
     if (!socket) {
         return (
@@ -109,6 +139,16 @@ const DashboardPage = ({socket, setupSocket}) => {
                                     </div>
                                 ))}
                             </div>
+                        </div>
+                    </div>
+                    <div className="cardDashboard">
+                        <p style={{ fontSize: "1.5rem", fontWeight: "bold", textAlign: "center" }}>Announcement</p>
+                        <div className="cardBody">
+                            <div className="inputGroup">
+                                <label htmlFor="importantMessageName">This message will broadcast to all chatroom</label>
+                                <input type="text" name="importantMessageName" id="importantMessageName" placeholder="Enter your message" ref={importantMessageNameRef} />
+                            </div>
+                            <button onClick={broadcastMessage}>Announce</button>
                         </div>
                     </div>
                 </div>
